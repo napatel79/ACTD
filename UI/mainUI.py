@@ -6,6 +6,8 @@ from window import *
 import time
 import checkConnection
 from checkConnection import Connection
+import readKey
+from readKey import KeyReader
 
 class MainWindow(Window):
 
@@ -25,6 +27,7 @@ class MainWindow(Window):
         self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
         self.conn = Connection()
+        self.keyObj = KeyReader()
 
         
 
@@ -50,6 +53,8 @@ class MainWindow(Window):
 
     def didConnect(self):
         if self.conn.findConnectedDevices(): #so it was connected
+            #get the stored UID first
+            self.storedUID = self.getStoredUID()
             self.checkUpdateScreen()
         else: #go to check device connection
             text_var = tkinter.StringVar(value="No Tracing Device Was Connected Please Reconnect the Tracing Device.")
@@ -60,6 +65,9 @@ class MainWindow(Window):
             self.after(3000, self.checkDeviceConnection)
 
 
+    def getStoredUID(self):
+        return self.keyObj.readKey()
+        
 
     def checkUpdateScreen(self):
         for widgets in self.winfo_children():
@@ -73,7 +81,7 @@ class MainWindow(Window):
         label = customtkinter.CTkLabel(master=frame, textvariable=text_var, fg_color="gray75",text_color='black',corner_radius=8)
         label.configure(font=('Helvatical bold',60))
         label.grid(row=0, column=0, padx=(0, 10))
-        button1 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"))
+        button1 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"), command=self.checkInfectionStatus)
         button1.grid(row=1,column=0)
         
         text_var2 = tkinter.StringVar(value="Update")
@@ -86,6 +94,11 @@ class MainWindow(Window):
         self.update()
 
     
+    def checkInfectionStatus(self):
+        #TODO: send self.storedUID to the db
+
+    def updateInfectionStatus(self):
+        #TODO: update infection of hte storeduid in the db
     def runMainWindow(self):
         self.mainloop()
 
