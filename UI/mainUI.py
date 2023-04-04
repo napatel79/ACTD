@@ -22,7 +22,7 @@ class MainWindow(Window):
                                corner_radius=8)
         self.label.configure(font=('Helvatical bold',50))
         self.label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
-        self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"))
+        self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
         self.conn = Connection()
 
@@ -34,7 +34,7 @@ class MainWindow(Window):
         label.configure(font=('Helvatical bold',30))
         label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
         self.update()
-        button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.checkDeviceConnection, fg_color=("gray75", "blue"))
+        button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.checkDeviceConnection, fg_color=("gray75", "blue"), bg_color='gray75')
         button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 
 
@@ -62,11 +62,27 @@ class MainWindow(Window):
 
 
     def checkUpdateScreen(self):
-        button_frame = tk.Frame(self)
-        button_frame.pack(side='bottom', fill='x')
-        button_frame.grid_columnconfigure(0, weight=1)
-        #make two buttons for update and check
-        button = customtkinter.CTkButton(master=button_frame, text='Update',corner_radius=30, command=self.checkDeviceConnection, fg_color=("gray75", "blue"))
+        for widgets in self.winfo_children():
+            widgets.destroy()
+        self.configure(fg_color='gray75')
+        
+        frame = customtkinter.CTkFrame(master=self,width=self.width, height=self.height,corner_radius=10, bg_color='gray75', fg_color='gray75')
+        # frame.pack(fill=BOTH, expand=YES, anchor='center')
+        frame.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER,)
+        text_var = tkinter.StringVar(value="Check")
+        label = customtkinter.CTkLabel(master=frame, textvariable=text_var, fg_color="gray75",text_color='black',corner_radius=8)
+        label.configure(font=('Helvatical bold',60))
+        label.grid(row=0, column=0, padx=(0, 10))
+        button1 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"))
+        button1.grid(row=1,column=0)
+        
+        text_var2 = tkinter.StringVar(value="Update")
+        label2 = customtkinter.CTkLabel(master=frame, textvariable=text_var2, fg_color="gray75",text_color='black',corner_radius=8)
+        label2.configure(font=('Helvatical bold',60))
+        label2.grid(row=0, column=2)
+        button2 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"))
+        button2.grid(row=1,column=2)
+        
         self.update()
 
     
