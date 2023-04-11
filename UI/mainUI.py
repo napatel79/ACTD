@@ -8,6 +8,10 @@ import checkConnection
 from checkConnection import Connection
 import readKey
 from readKey import KeyReader
+import requests
+import uuid
+import json
+from datetime import datetime, timezone
 
 class MainWindow(Window):
 
@@ -27,7 +31,7 @@ class MainWindow(Window):
         self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
         self.conn = Connection()
-        self.keyObj = KeyReader()
+        # self.keyObj = KeyReader()
 
         
 
@@ -54,7 +58,7 @@ class MainWindow(Window):
     def didConnect(self):
         if self.conn.findConnectedDevices(): #so it was connected
             #get the stored UID first
-            self.storedUID = self.getStoredUID()
+            # self.storedUID = self.getStoredUID()
             self.checkUpdateScreen()
         else: #go to check device connection
             text_var = tkinter.StringVar(value="No Tracing Device Was Connected Please Reconnect the Tracing Device.")
@@ -65,8 +69,9 @@ class MainWindow(Window):
             self.after(3000, self.checkDeviceConnection)
 
 
-    def getStoredUID(self):
-        return self.keyObj.readKey()
+    # def getStoredUID(self):
+        
+        # return self.keyObj.readKey()
         
 
     def checkUpdateScreen(self):
@@ -88,17 +93,60 @@ class MainWindow(Window):
         label2 = customtkinter.CTkLabel(master=frame, textvariable=text_var2, fg_color="gray75",text_color='black',corner_radius=8)
         label2.configure(font=('Helvatical bold',60))
         label2.grid(row=0, column=2)
-        button2 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"))
+        button2 = customtkinter.CTkButton(master=frame, text='Enter',corner_radius=30, fg_color=("gray75", "blue"), command=self.updateInfectionStatus)
         button2.grid(row=1,column=2)
         
         self.update()
 
     
     def checkInfectionStatus(self):
+        uuid1 = '3d6913d1-4887-4384-a3a9-a1e906b25541'
+        uuid2 = '248d08d9-df6c-4e89-9462-5e5df4573422'
+        uuid3 = '6fbdae85-93f9-4ac8-a245-2978edc05db3'
+        uuid4 = 'dd6131f9-82b2-4f83-8d32-d3ccd290f694'
+        uuid5 = '0928bf94-b7be-4127-b9dd-62fbb5adaaa5'
+        uuid6 = 'd7de87a7-cc71-4464-bdda-3d47fc0b22e6'
+        uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
+        uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
+
         #TODO: send self.storedUID to the db
+        PATH = 'http://34.29.55.201:9090'
+        
+        r = requests.get(PATH + '/check', json={
+            "UUID": str(uuid4),
+        })
+
+        try :
+            print(f"Status Code: {r.status_code}, Response: {r.json()}")
+        except:
+            print(f"Status Code: {r.status_code, r.content}")
+
 
     def updateInfectionStatus(self):
-        #TODO: update infection of hte storeduid in the db
+        uuid1 = '3d6913d1-4887-4384-a3a9-a1e906b25541'
+        uuid2 = '248d08d9-df6c-4e89-9462-5e5df4573422'
+        uuid3 = '6fbdae85-93f9-4ac8-a245-2978edc05db3'
+        uuid4 = 'dd6131f9-82b2-4f83-8d32-d3ccd290f694'
+        uuid5 = '0928bf94-b7be-4127-b9dd-62fbb5adaaa5'
+        uuid6 = 'd7de87a7-cc71-4464-bdda-3d47fc0b22e6'
+        uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
+        uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
+
+        PATH = 'http://34.29.55.201:9090'  
+
+
+        r = requests.post(PATH + '/insert', json={
+        "UUID": str(uuid8),
+        "UUID2": str(uuid7),
+        "Infected": True,
+        "ContactDate": str(datetime.utcnow())
+        })
+        try :
+            print(f"Status Code: {r.status_code}, Response: {r.json()}")
+        except:
+            print(f"Status Code: {r.status_code, r.content}")        
+
+
     def runMainWindow(self):
         self.mainloop()
 
@@ -109,3 +157,9 @@ if __name__ == '__main__':
     # ui.wait_for_connection()
     ui.runMainWindow()
     
+
+
+
+
+
+
