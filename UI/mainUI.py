@@ -17,7 +17,20 @@ class MainWindow(Window):
 
     def __init__(self):
         super().__init__()
-        text_var = tkinter.StringVar(value="ACTD")
+        self.conn = Connection()
+        # self.keyObj = KeyReader()
+        self.place_string('ACTD')
+        self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
+        self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
+        
+    def clear_screen(self):
+        for widgets in self.winfo_children():
+            widgets.destroy()
+        self.configure(fg_color='gray75')
+        
+        
+    def place_string(self, text, buttonExists=False, buttonText='', buttonCmd=None):
+        text_var = tkinter.StringVar(value=text)
         self.label = customtkinter.CTkLabel(master=self,
                                textvariable=text_var,
                                width=self.width,
@@ -28,29 +41,22 @@ class MainWindow(Window):
                                corner_radius=8)
         self.label.configure(font=('Helvatical bold',50))
         self.label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
-        self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
-        self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
-        self.conn = Connection()
-        # self.keyObj = KeyReader()
-
-        
-
-    def wait_for_connection(self):
-        text_var = tkinter.StringVar(value="Please Plug in your Tracing Device. Once Connected Press the Button Below")
-        label = customtkinter.CTkLabel(master=self, textvariable=text_var, width=self.width, height=self.height, fg_color=("black", "gray75"),bg_color=("black", "gray75"),text_color='black',corner_radius=8)
-        label.configure(font=('Helvatical bold',30))
-        label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
         self.update()
+
+            
+        
+        
+    def wait_for_connection(self):
+        strVal = 'Please Plug in your Tracing Device. Once Connected Press the Button Below'
+        self.place_string(strVal)
+        
         button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.checkDeviceConnection, fg_color=("gray75", "blue"), bg_color='gray75')
         button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 
 
     def checkDeviceConnection(self):
-        text_var = tkinter.StringVar(value="Checking Connection. Please Wait")
-        label = customtkinter.CTkLabel(master=self, textvariable=text_var, width=self.width, height=self.height, fg_color=("black", "gray75"),bg_color=("black", "gray75"),text_color='black',corner_radius=8)
-        label.configure(font=('Helvatical bold',30))
-        label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
-        self.update()
+        strVal = 'Checking Connection. Please Wait'
+        self.place_string(strVal) 
         self.after(1000, self.didConnect)#TODO:change this to 6 sec so 6000
         
         
@@ -61,11 +67,8 @@ class MainWindow(Window):
             # self.storedUID = self.getStoredUID()
             self.checkUpdateScreen()
         else: #go to check device connection
-            text_var = tkinter.StringVar(value="No Tracing Device Was Connected Please Reconnect the Tracing Device.")
-            label = customtkinter.CTkLabel(master=self, textvariable=text_var, width=self.width, height=self.height, fg_color=("black", "gray75"),bg_color=("black", "gray75"),text_color='black',corner_radius=8)
-            label.configure(font=('Helvatical bold',30))
-            label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
-            self.update()
+            text_var = 'No Tracing Device Was Connected Please Reconnect the Tracing Device'
+            self.place_string(text_var)
             self.after(3000, self.checkDeviceConnection)
 
 
@@ -75,9 +78,7 @@ class MainWindow(Window):
         
 
     def checkUpdateScreen(self):
-        for widgets in self.winfo_children():
-            widgets.destroy()
-        self.configure(fg_color='gray75')
+        self.clear_screen()
         
         frame = customtkinter.CTkFrame(master=self,width=self.width, height=self.height,corner_radius=10, bg_color='gray75', fg_color='gray75')
         # frame.pack(fill=BOTH, expand=YES, anchor='center')
@@ -112,14 +113,23 @@ class MainWindow(Window):
         #TODO: send self.storedUID to the db
         PATH = 'http://34.29.55.201:9090'
         
-        r = requests.get(PATH + '/check', json={
-            "UUID": str(uuid4),
-        })
+        
 
         try :
-            print(f"Status Code: {r.status_code}, Response: {r.json()}")
+            self.clear_screen()
+            r = requests.get(PATH + '/check', json={
+                "UUID": str(uuid4),
+            })
+            if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
+                self.place_string(str(r.json()))
+            else:   
+                self.place_string('There was an error in the server. Please Try Again.')         
         except:
-            print(f"Status Code: {r.status_code, r.content}")
+            self.place_string('There was an error in the server. Please Try Again.')
+            # print(f"Status Code: {r.status_code, r.content}")
+        finally:
+            button = customtkinter.CTkButton(master=self, text='Home',corner_radius=30, command=self.checkUpdateScreen, fg_color=("gray75", "blue"), bg_color='gray75')
+            button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 
 
     def updateInfectionStatus(self):
@@ -131,20 +141,30 @@ class MainWindow(Window):
         uuid6 = 'd7de87a7-cc71-4464-bdda-3d47fc0b22e6'
         uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
         uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
-
         PATH = 'http://34.29.55.201:9090'  
 
 
-        r = requests.post(PATH + '/insert', json={
-        "UUID": str(uuid8),
-        "UUID2": str(uuid7),
-        "Infected": True,
-        "ContactDate": str(datetime.utcnow())
-        })
-        try :
-            print(f"Status Code: {r.status_code}, Response: {r.json()}")
+
+            
+        try:
+            r = requests.post(PATH + '/insert', json={
+                "UUID": str(uuid8), #TODO:replace this with self.uuid or the stored rom key
+                "UUID2": str(uuid7),
+                "Infected": True,
+                "ContactDate": str(datetime.utcnow())
+            })
+            if r.status_code == 200:
+                self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.')
+            else:   
+                self.place_string('There was an error in the server. Please Try Again.') 
+            # print(f"Status Code: {r.status_code}, Response: {r.json()}")
         except:
-            print(f"Status Code: {r.status_code, r.content}")        
+            self.place_string('There was an error in the server. Please Try Again.') 
+            # print(f"Status Code: {r.status_code, r.content}")
+        finally:
+            button = customtkinter.CTkButton(master=self, text='Home',corner_radius=30, command=self.checkUpdateScreen, fg_color=("gray75", "blue"), bg_color='gray75')
+            button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
+        
 
 
     def runMainWindow(self):
@@ -157,6 +177,8 @@ if __name__ == '__main__':
     # ui.wait_for_connection()
     ui.runMainWindow()
     
+    #TODO: make code that runs in the background that does an insert statment each of the uuids it
+    #stores in the filesystem
 
 
 
