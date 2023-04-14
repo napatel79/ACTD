@@ -14,10 +14,11 @@
 #include <bluefruit.h>
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
+#include "UUID.h"
 
 #define IDSIZE 16
-byte uuid[IDSIZE];
-char writestring[sizeof(uuid) * 2];
+UUID uuid;
+char writestring[37];
 
 void generateguid(byte[]);
 
@@ -30,15 +31,17 @@ BLEBas  blebas;  // battery
 void setup()
 {
   Serial.begin(115200);
+  uuid.seed(123456789, 987654321);
+  uuid.generate();
   randomSeed(42069);
-
-  generateguid(uuid);
+  memcpy(&writestring, uuid.toCharArray(), 37);
+  // generateguid(uuid);
 
   // char writestring[sizeof(detectedguid) * 2 + 1];
 
-      for (int i = 0; i < sizeof(uuid); i++) {
-        sprintf(&writestring[i * 2], "%02X", uuid[i]);
-      }
+      // for (int i = 0; i < sizeof(uuid); i++) {
+      //   sprintf(&writestring[i * 2], "%02X", uuid[i]);
+      // }
       // writestring[sizeof(detectedguid) * 2] = '\n';
 
 #if CFG_DEBUG
@@ -150,7 +153,7 @@ void connect_callback(uint16_t conn_handle)
   Serial.println(central_name);
   delay(2000); //wait for central to be ready to receive
   Serial.println("Sending UUID");
-  for (unsigned i = 0; i < 8; i++) {
+  for (unsigned i = 0; i < 9; i++) {
     // int count = Serial.readBytes(buf, 4);
     //delay(2);
     bleuart.write(&writestring[i*4], 4 );

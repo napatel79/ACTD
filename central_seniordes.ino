@@ -151,7 +151,7 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
  * @param uart_svc Reference object to the service where the data 
  * arrived. In this example it is clientUart
  */
-char uuid[33];
+char uuid[37];
 int loopCount = 0;
 
 void bleuart_rx_callback(BLEClientUart& uart_svc)
@@ -172,8 +172,8 @@ void bleuart_rx_callback(BLEClientUart& uart_svc)
   //Serial.println(loopCount);
   loopCount++;
 
-  if(loopCount == 8) {
-    uuid[32] = '\n';
+  if(loopCount == 9) {
+    uuid[36] = '\n';
     setupfile("devicedata", 1);
     // Serial.print("UUID: ");
     // Serial.write(uuid, sizeof(uuid));
