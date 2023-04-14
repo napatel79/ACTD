@@ -5,7 +5,7 @@ import serial
 import time
 
 class KeyReader():
-    def __init__(): 
+    def __init__(self): 
         self.fileName = 'devicedata.txt'
         
 
