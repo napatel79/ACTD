@@ -18,7 +18,7 @@ class MainWindow(Window):
     def __init__(self):
         super().__init__()
         self.conn = Connection()
-        # self.keyObj = KeyReader()
+        self.keyObj = KeyReader()
         self.place_string('ACTD')
         self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
@@ -64,7 +64,7 @@ class MainWindow(Window):
     def didConnect(self):
         if self.conn.findConnectedDevices(): #so it was connected
             #get the stored UID first
-            # self.storedUID = self.getStoredUID()
+            self.storedUID = self.getStoredUID()
             self.checkUpdateScreen()
         else: #go to check device connection
             text_var = 'No Tracing Device Was Connected Please Reconnect the Tracing Device'
@@ -72,9 +72,9 @@ class MainWindow(Window):
             self.after(3000, self.checkDeviceConnection)
 
 
-    # def getStoredUID(self):
+    def getStoredUID(self):
         
-        # return self.keyObj.readKey()
+        return self.keyObj.readUID()
         
 
     def checkUpdateScreen(self):
@@ -109,6 +109,7 @@ class MainWindow(Window):
         uuid6 = 'd7de87a7-cc71-4464-bdda-3d47fc0b22e6'
         uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
         uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
+        
 
         #TODO: send self.storedUID to the db
         PATH = 'http://34.29.55.201:9090'
@@ -148,8 +149,8 @@ class MainWindow(Window):
             
         try:
             r = requests.post(PATH + '/insert', json={
-                "UUID": str(uuid8), #TODO:replace this with self.uuid or the stored rom key
-                "UUID2": str(uuid7),
+                "UUID": str(self.storedUID), #TODO:replace this with self.uuid or the stored rom key
+                "UUID2": str(uuid4),
                 "Infected": True,
                 "ContactDate": str(datetime.utcnow())
             })
