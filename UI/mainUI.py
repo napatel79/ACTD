@@ -29,7 +29,7 @@ class MainWindow(Window):
         self.configure(fg_color='gray75')
         
         
-    def place_string(self, text, buttonExists=False, buttonText='', buttonCmd=None):
+    def place_string(self, text, sz=50):
         text_var = tkinter.StringVar(value=text)
         self.label = customtkinter.CTkLabel(master=self,
                                textvariable=text_var,
@@ -39,7 +39,7 @@ class MainWindow(Window):
                                bg_color=("black", "gray75"),
                                text_color='black',
                                corner_radius=8)
-        self.label.configure(font=('Helvatical bold',50))
+        self.label.configure(font=('Helvatical bold',sz))
         self.label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
         self.update()
 
@@ -112,21 +112,18 @@ class MainWindow(Window):
 
         #TODO: send self.storedUID to the db
         PATH = 'http://34.29.55.201:9090'
-        
-        
-
         try :
             self.clear_screen()
             r = requests.get(PATH + '/check', json={
-                "UUID": str(uuid4),
+                "UUID": str(uuid8),
             })
             if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
-                self.place_string(str(r.json()))
+                self.place_string('Your Infection Result is:' + str(r.json()))
             else:   
                 self.place_string('There was an error in the server. Please Try Again.')         
         except:
             self.place_string('There was an error in the server. Please Try Again.')
-            # print(f"Status Code: {r.status_code, r.content}")
+            print(f"Status Code: {r.status_code, r.content}")
         finally:
             button = customtkinter.CTkButton(master=self, text='Home',corner_radius=30, command=self.checkUpdateScreen, fg_color=("gray75", "blue"), bg_color='gray75')
             button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
@@ -142,10 +139,6 @@ class MainWindow(Window):
         uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
         uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
         PATH = 'http://34.29.55.201:9090'  
-
-
-
-            
         try:
             r = requests.post(PATH + '/insert', json={
                 "UUID": str(uuid8), #TODO:replace this with self.uuid or the stored rom key
@@ -154,7 +147,7 @@ class MainWindow(Window):
                 "ContactDate": str(datetime.utcnow())
             })
             if r.status_code == 200:
-                self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.')
+                self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.', 25)
             else:   
                 self.place_string('There was an error in the server. Please Try Again.') 
             # print(f"Status Code: {r.status_code}, Response: {r.json()}")
