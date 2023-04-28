@@ -12,6 +12,7 @@ import requests
 import uuid
 import json
 from datetime import datetime, timezone
+import subprocess
 
 class MainWindow(Window):
 
@@ -22,6 +23,7 @@ class MainWindow(Window):
         self.place_string('ACTD')
         self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
+        subprocess.run(["python", "deviceio.py"])
         
     def clear_screen(self):
         for widgets in self.winfo_children():
