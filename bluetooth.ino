@@ -129,6 +129,7 @@ void loop() {
     count = 0;
     printfileguids("deviceid");
     printfileguids("received");
+    Serial.println("flush");
     // printfileguids("day-2");
     // printfileguids("day-3");
     // printfileguids("day-4");
@@ -289,7 +290,7 @@ void prph_connect_callback(uint16_t conn_handle)
   //this chunk is really just for debugging
   char central_name[32] = { 0 };
   connection->getPeerName(central_name, sizeof(central_name));
-  Serial.print("Connected to ");
+  // Serial.print("Connected to ");
   // Serial.println(central_name);
 
 
