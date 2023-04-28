@@ -5,7 +5,8 @@ import time
 class Connection():
     def __init__(self):
         self.osType = platform.system().lower()
-    
+        self.storedUID = 'Temp-UID'
+        
     def findConnectedDevices(self):
         if 'windows' in self.osType:
             devices = os.popen('powershell \"Get-PnpDevice -PresentOnly | Where-Object { $_.InstanceId -match \'^USB\' }\"').read()#basically os.system but saves output to a var

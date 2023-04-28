@@ -6,16 +6,28 @@ import time
 
 class KeyReader():
     def __init__(): 
-        self.fileName = 'devicedata.txt'
-        
+        self.fileName = 'deviceid.txt'
+        self.recievedFilename = 'received.txt'
+        self.storedUID = 'temp-uid'
+        self.receivedUID = []
 
     def readUID(self):
         try:
             f = open(self.fileName)
             key = f.read()
-            return key
+            self.storedUID = key
         except:
-            print('file was not found. please try again')
+            print('stored file was not found. please try again')
+    
+    def readReceived(self):
+        try:
+            f = open(self.recievedFilename)
+            self.receivedUID.append(f.readline())
+        except:
+            print('received file was not found. please try again')
+
+    
+    
        
 
 

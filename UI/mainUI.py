@@ -23,8 +23,8 @@ class MainWindow(Window):
         self.place_string('ACTD')
         self.button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.wait_for_connection, fg_color=("gray75", "blue"), bg_color='gray75')
         self.button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
-        subprocess.run(["python", "deviceio.py"])
-        
+        # subprocess.run(["python", "deviceio.py"])
+        self.keyReader = KeyReader()
     def clear_screen(self):
         for widgets in self.winfo_children():
             widgets.destroy()
@@ -64,19 +64,43 @@ class MainWindow(Window):
         
 
     def didConnect(self):
-        if self.conn.findConnectedDevices(): #so it was connected
-            #get the stored UID first
-            # self.storedUID = self.getStoredUID()
-            self.checkUpdateScreen()
-        else: #go to check device connection
-            text_var = 'No Tracing Device Was Connected Please Reconnect the Tracing Device'
-            self.place_string(text_var)
-            self.after(3000, self.checkDeviceConnection)
+        self.keyReader.readReceived()
+        self.keyReader.readUID()
+        self.place_string("Reading keys stored in device... Loading")
+        self.insert_uid_pairs()
+
+        # if self.conn.findConnectedDevices(): #so it was connected
+        #     #get the stored UID first
+        #     # self.storedUID = self.getStoredUID()
+        #     self.checkUpdateScreen()
+        # else: #go to check device connection
+        #     text_var = 'No Tracing Device Was Connected Please Reconnect the Tracing Device'
+        #     self.place_string(text_var)
+        #     self.after(3000, self.checkDeviceConnection)
 
 
-    # def getStoredUID(self):
-        
-        # return self.keyObj.readKey()
+    def insert_uid_pairs(self):
+        PATH = 'http://34.29.55.201:9090'  
+        for key in self.keyReader.receivedUID:
+            try:
+                r = requests.post(PATH + '/insert', json={
+                    "UUID": str(self.keyReader.storedUID), 
+                    "UUID2": str(key),
+                    "Infected": False,
+                    "ContactDate": str(datetime.utcnow())
+                })
+                if r.status_code == 200:
+                    # self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.', 25)
+                    pass
+                else:   
+                    self.place_string('Status code of 200 was not received') 
+                # print(f"Status Code: {r.status_code}, Response: {r.json()}")
+            except:
+                self.place_string('There was an error in the server. Please Try Again.') 
+                # print(f"Status Code: {r.status_code, r.content}")
+            finally:
+                button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.checkUpdateScreen, fg_color=("gray75", "blue"), bg_color='gray75')
+                button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
         
 
     def checkUpdateScreen(self):
@@ -117,7 +141,7 @@ class MainWindow(Window):
         try :
             self.clear_screen()
             r = requests.get(PATH + '/check', json={
-                "UUID": str(uuid8),
+                "UUID": str(self.keyReader.readUID()),
             })
             if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
                 self.place_string('Your Infection Result is:' + str(r.json()))
@@ -131,6 +155,9 @@ class MainWindow(Window):
             button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 
 
+    
+
+
     def updateInfectionStatus(self):
         uuid1 = '3d6913d1-4887-4384-a3a9-a1e906b25541'
         uuid2 = '248d08d9-df6c-4e89-9462-5e5df4573422'
@@ -140,22 +167,19 @@ class MainWindow(Window):
         uuid6 = 'd7de87a7-cc71-4464-bdda-3d47fc0b22e6'
         uuid7 = '082c155b-3e1e-4745-8d96-c11b43541ed7'
         uuid8 = '8196b759-a38a-468d-9889-340451bbd888'
-        PATH = 'http://34.29.55.201:9090'  
-        try:
-            r = requests.post(PATH + '/insert', json={
-                "UUID": str(uuid8), #TODO:replace this with self.uuid or the stored rom key
-                "UUID2": str(uuid7),
-                "Infected": True,
-                "ContactDate": str(datetime.utcnow())
+        PATH = 'http://34.29.55.201:9090'
+        try :
+            self.clear_screen()
+            r = requests.get(PATH + '/update', json={
+                "UUID": str(self.keyReader.storedUID),
             })
-            if r.status_code == 200:
-                self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.', 25)
+            if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
+                self.place_string('Your Infection Result is:' + str(r.json()))
             else:   
-                self.place_string('There was an error in the server. Please Try Again.') 
-            # print(f"Status Code: {r.status_code}, Response: {r.json()}")
+                self.place_string('There was an error in the server. Please Try Again.')         
         except:
-            self.place_string('There was an error in the server. Please Try Again.') 
-            # print(f"Status Code: {r.status_code, r.content}")
+            self.place_string('There was an error in the server. Please Try Again.')
+            print(f"Status Code: {r.status_code, r.content}")
         finally:
             button = customtkinter.CTkButton(master=self, text='Home',corner_radius=30, command=self.checkUpdateScreen, fg_color=("gray75", "blue"), bg_color='gray75')
             button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
