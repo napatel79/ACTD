@@ -12,25 +12,20 @@ import asyncio
 
 
 # Get a list of available COM ports
-ports = list(serial.tools.list_ports.comports())
+
 
 # Check if a specific device is connected
 device_name = "Silicon Labs CP210x USB to UART Bridge"
-serial_port ='COM5'
-for port in ports:
-    print("Found", port.device, "on", port.description)
-    if device_name in port.description:
-        serial_port = port.device
-        print("Found", device_name, "on", serial_port)
-        break
-
-
+serial_port ='COM1'
+guid = "bebdac3f-3c33-44b4-b5bb-c90e76363475"
+guid = "00000000-0000-0000-0000-000000000000"
+olddata = "temp.txt"
+data = "temp.txt"
 # Connect to the device and print any received data
 # Change the following values to match your serial port settings
 # serial_port ='COM5'
 baud_rate = 115200
-if os.path.exists("deviceid.txt"):
-  os.remove("deviceid.txt")
+
 file  = open("temp.txt", "a")
 while True:
     try:
@@ -39,26 +34,36 @@ while True:
         while True:
             try:
                 if ser.in_waiting:
+                    olddata = data
                     data = ser.readline().decode('utf-8').rstrip()
+                    if ("deviceid" in olddata):
+                        guid = data[:-2]
+                    if("flush" in data):
+                        file.close()
+                        file  = open("temp.txt", "a")
                     if(len(data) < 32 and len(data) > 0):
                         file.close()
-                        if(data != "deviceid" and exists("deviceid.txt")):
-                            deviceidfile = open("deviceid.txt", "r")
-                            guid = deviceidfile.read()[:-2]
-                            if not os.path.exists(relpath(guid)):
-                                makedirs(relpath(guid))
-                            file  = open(relpath(guid + "/" + data + ".txt"), "w")
-                        else:
-                            file  = open(data + ".txt", "w")
-                        print("logging to " + data)
+                        if not os.path.exists(relpath(guid)):
+                            makedirs(relpath(guid))
+                        file  = open(relpath(guid + "/" + data + ".txt"), "w")
+                        print("logging to " + file.name)
                     else:
                         file.write(data + "\n")
-                        print(f"Received data: {data}")
+                        print(f"Received data: {data} logged to {file.name}")
             except serial.serialutil.SerialException:
                 time.sleep(1)
                 break
+
     except serial.serialutil.SerialException:
         print(f"Serial port {serial_port} not available. Waiting for device...")
+        time.sleep(1)
+        ports = list(serial.tools.list_ports.comports())
+        for port in ports:
+            print("Found", port.device, "on", port.description)
+            if device_name in port.description:
+                serial_port = port.device
+                print("Found", device_name, "on", serial_port)
+                break
         time.sleep(1)
 
 
