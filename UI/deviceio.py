@@ -45,9 +45,9 @@ while True:
                         if(data != "deviceid" and exists("deviceid.txt")):
                             deviceidfile = open("deviceid.txt", "r")
                             guid = deviceidfile.read()[:-2]
-                            if not os.path.exists(relpath(guid)):
-                                makedirs(relpath(guid))
-                            file  = open(relpath(guid + "/" + data + ".txt"), "w")
+                            #if not os.path.exists(relpath(guid)):
+                            #    makedirs(relpath(guid))
+                            file  = open(relpath( data + ".txt"), "w")#guid + "/" +
                         else:
                             file  = open(data + ".txt", "w")
                         print("logging to " + data)

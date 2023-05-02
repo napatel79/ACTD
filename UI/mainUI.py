@@ -50,7 +50,7 @@ class MainWindow(Window):
         
     def wait_for_connection(self):
         strVal = 'Please Plug in your Tracing Device. Once Connected Press the Button Below'
-        self.place_string(strVal)
+        self.place_string(strVal, 30)
         
         button = customtkinter.CTkButton(master=self, text='Enter',corner_radius=30, command=self.checkDeviceConnection, fg_color=("gray75", "blue"), bg_color='gray75')
         button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
@@ -81,6 +81,8 @@ class MainWindow(Window):
 
     def insert_uid_pairs(self):
         PATH = 'http://34.29.55.201:9090'  
+        # print(self.keyReader.receivedUID, self.keyReader.storedUID)
+
         for key in self.keyReader.receivedUID:
             try:
                 r = requests.post(PATH + '/insert', json={
@@ -90,11 +92,12 @@ class MainWindow(Window):
                     "ContactDate": str(datetime.utcnow())
                 })
                 if r.status_code == 200:
-                    # self.place_string('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.', 25)
+                    # self.place_string
+                    # print('Your status has been updated successfully. If infected, please notify your local health center and quarantine properly.', 25)
                     pass
                 else:   
-                    self.place_string('Status code of 200 was not received') 
-                # print(f"Status Code: {r.status_code}, Response: {r.json()}")
+                    self.place_string('Status code was not received') 
+                    # print(f"Status Code: {r.status_code}, Response: {r.json()}")
             except:
                 self.place_string('There was an error in the server. Please Try Again.') 
                 # print(f"Status Code: {r.status_code, r.content}")
@@ -141,12 +144,14 @@ class MainWindow(Window):
         try :
             self.clear_screen()
             r = requests.get(PATH + '/check', json={
-                "UUID": str(self.keyReader.readUID()),
+                "UUID": str(self.keyReader.storedUID),
             })
             if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
                 self.place_string('Your Infection Result is:' + str(r.json()))
             else:   
                 self.place_string('There was an error in the server. Please Try Again.')         
+                print(f"Status Code: {r.status_code, r.content}")
+
         except:
             self.place_string('There was an error in the server. Please Try Again.')
             print(f"Status Code: {r.status_code, r.content}")
@@ -171,12 +176,15 @@ class MainWindow(Window):
         try :
             self.clear_screen()
             r = requests.get(PATH + '/update', json={
-                "UUID": str(self.keyReader.storedUID),
+                "UUID": str(self.keyReader.storedUID)
             })
             if r.status_code == 200: #TODO: check the status of the infection and if true say quarantine and if false say you are healthy
-                self.place_string('Your Infection Result is:' + str(r.json()))
+                # self.place_string('Your Infection Result is:' + str(r.json()))
+                self.place_string('Infection status updated')
             else:   
-                self.place_string('There was an error in the server. Please Try Again.')         
+                self.place_string('There was an error in the server. Please Try Again.')
+                print(f"Status Code: {r.status_code, r.content}")
+
         except:
             self.place_string('There was an error in the server. Please Try Again.')
             print(f"Status Code: {r.status_code, r.content}")
